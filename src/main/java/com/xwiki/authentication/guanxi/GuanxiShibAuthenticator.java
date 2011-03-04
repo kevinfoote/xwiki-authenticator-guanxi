@@ -27,7 +27,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 //import org.apache.ecs.xhtml.map;
-//import org.securityfilter.realm.SimplePrincipal;
+import org.securityfilter.realm.SimplePrincipal;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -39,25 +39,45 @@ import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
 
 public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
 
+    /**
+     * Logging tool
+     */
     private static final Log log = LogFactory.getLog(GuanxiShibAuthenticator.class);
-    
-/**
-    @Override
-    public XWikiUser checkAuth(XWikiContext context) throws XWikiException {
-        XWikiUser user = null;
-        return user;
-    }
 
+    // will need to get our CONSTANTS set up 
+    // function to read guanxiShibAuthenticator.properties
+
+    /**
+     *   
+     *
+     */
     @Override
     public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException {
         Principal principal = null;
+        // Will call checkAuth function from here.. 
         return principal;
     }
 
+    /**
+     *   
+     *
+     */
+    @Override
+    public XWikiUser checkAuth(XWikiContext context) throws XWikiException {
+        XWikiUser user = null;
+        // this is where real work is to be done .. 
+        // pull header / REMOTE_USER info should call createUser 
+        //   if create_user is true and user does not exist
+        return user;
+    }
+
+    /**
+     *   
+     *
+     */
     @Override
     public void showLogin(XWikiContext context) throws XWikiException {
     }
-**/
 
     public void sayHello() {
         return;
