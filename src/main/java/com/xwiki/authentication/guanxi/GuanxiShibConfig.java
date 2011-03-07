@@ -19,39 +19,14 @@
  */
 package com.xwiki.authentication.guanxi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 
-public class GuanxiShibConfigurator {
+public class GuanxiShibConfig {
 
-    private static final Log log = LogFactory.getLog(GuanxiShibConfLoader.class);
-    
-    /**
-     *   
-     *   Load the configuration 
-     */
-    public GuanxiShibConfiguration getGuanxiShibConfiguration( ) {
-
-       GuanxiShibConfiguration config = new GuanxiShibConfiguration;
-       try { 
-           //LOAD the config from file
-       } catch (IOException e) {
-            log.warn("Unable to read properties from file, defaulting", e);
-       }
-
-    } 
 }

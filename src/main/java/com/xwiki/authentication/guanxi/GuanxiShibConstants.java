@@ -20,4 +20,45 @@
 package com.xwiki.authentication.guanxi;
 
 public class GuanxiShibConstants {
+
+    /**
+     *   Location of configuration file on classpath
+     */
+    public final static String PROPERTIES_FILE = "/GuanxiShibAuthenticator.properties";
+
+    /**
+     *   Should this authenticator create users 
+     */
+    public final static String CREATE_USERS = "create.users";
+
+    /**
+     *   Should this authenticator update userinfo upon login
+     */
+    public final static String UPDATE_INFO = "update.info";
+
+    /**
+     *   Default group(s) to place new users into within XWiki 
+     */
+    public final static String DEFAULT_XWIKI_GROUPS = "default.groups";
+
+    /**
+     *   Default XWiki space users are placed [[XWIKI-363]] 
+     */
+    public final static String DEFAULT_XWIKI_USER_SPACE = "default.userspace";
+
+    /**
+     *  Shib header attribute to use for user if no REMOTE_USER 
+     */
+    public final static String HEADER_USERID = "header.userid";
+
+    /**
+     *  Shib header attribute to use for mail 
+     */
+    public final static String HEADER_MAIL = "header.mail";
+
+    /**
+     *  Shib header to use for full name 
+     */
+    public final static String HEADER_FULLNAME = "header.fullname";
+
 }
