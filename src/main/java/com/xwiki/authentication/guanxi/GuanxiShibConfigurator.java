@@ -38,20 +38,34 @@ import java.util.Properties;
 
 public class GuanxiShibConfigurator {
 
-    private static final Log log = LogFactory.getLog(GuanxiShibConfLoader.class);
+    private static final Log log = LogFactory.getLog(GuanxiShibConfigurator.class);
     
     /**
      *   
-     *   Load the configuration 
+     *   Load the config from file 
      */
-    public GuanxiShibConfiguration getGuanxiShibConfiguration( ) {
+    public GuanxiShibConfig getGuanxiShibConfig( ) {
+       
+       if (log.isDebugEnabled()) {
+           log.debug("Loading GuanxiShibConfig using " + GuanxiShibConstants.PROPERTIES_FILE);
+       }
 
-       GuanxiShibConfiguration config = new GuanxiShibConfiguration;
+       GuanxiShibConfig config = new GuanxiShibConfig();
+
        try { 
            //LOAD the config from file
+           InputStream propertiesIn = null; 
+           propertiesIn = GuanxiShibAuthenticator.class.getResourceAsStream(
+                    GuanxiShibConstants.PROPERTIES_FILE);
+
+           Properties configProperties = new Properties();
+           configProperties.load(propertiesIn);
+           
        } catch (IOException e) {
             log.warn("Unable to read properties from file, defaulting", e);
        }
+
+       return config;
 
     } 
 }

@@ -24,7 +24,8 @@ public class GuanxiShibConstants {
     /**
      *   Location of configuration file on classpath
      */
-    public final static String PROPERTIES_FILE = "/GuanxiShibAuthenticator.properties";
+    public final static String PROPERTIES_FILE = 
+        "/GuanxiShibAuthenticator.properties";
 
     /**
      *   Should this authenticator create users 
