@@ -60,6 +60,9 @@ public class GuanxiShibConfigurator {
 
            Properties configProperties = new Properties();
            configProperties.load(propertiesIn);
+
+           if( ) {
+           }
            
        } catch (IOException e) {
             log.warn("Unable to read properties from file, defaulting", e);

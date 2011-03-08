@@ -29,4 +29,126 @@ import java.util.Set;
 
 public class GuanxiShibConfig {
 
+    /**
+     * properties file 
+     */
+    private String propertiesFile;
+
+    /**
+     * create accounts for new users or not
+     */
+    private boolean createUsers;
+
+    /**
+     * update accounts info on each login 
+     */
+    private boolean updateInfo;
+
+    /**
+     * roles newly created users get assigned
+     */
+    private List defaultGroups;
+
+    /**
+     * default space for users 
+     */
+    private String defaultUserSpace;
+
+    /**
+     * header to use instead of REMOTE_USER 
+     */
+    private String headerUserid;
+
+    /**
+     * header to use for email
+     */
+    private String headerMail;
+
+    /**
+     * header to use for fullname 
+     */
+    private String headerFullname;
+
+    /**
+     * header to use for fullname 
+     */
+    private String headerFullname;
+
+    /**
+     * replacement char to use when defining eppn users 
+     */
+    private String replacementChar;
+
+    /** METHODS TO FOLLOW **/
+   public boolean isCreateUsers() {
+        return createUsers;
+    }
+
+    public void setCreateUsers(boolean createUsers) {
+        this.createUsers = createUsers;
+
+
+    public void setPropertiesFile(String propertiesFile) {
+        this.propertiesFile = propertiesFile;
+    }
+    public String getPropertiesFile() {
+        return propertiesFile;
+    }
+    
+    public void setCreateUsers(boolean createUsers) {
+        this.createUsers = createUsers;
+    }
+    public boolean isCreateUsers() {
+        return createUsers;
+    }
+   
+    public void setUpdateInfo(boolean updateInfo) {
+        this.updateInfo = updateInfo;
+    }
+    public boolean isUpdateInfo() {
+        return updateInfo;
+    }
+ 
+    public void setDefaultGroups(List defaultGroups) {
+        this.defaultGroups = defaultGroups;
+    }
+    public List getDefaultGroups( ) {
+        return defaultGroups;
+    }
+  
+    public void setDefaultUserSpace(String defaultUserSpace) {
+        this.defaultUserSpace = defaultUserSpace;
+    }
+    public String getDefaultUserSpace( ) {
+        return defaultUserSpace;
+    }
+ 
+    public void setHeaderUserid(String headerUserid) {
+        this.headerUserid = headerUserid;
+    }
+    public String getHeaderUserid( ) {
+        return headerUserid;
+    }
+
+    public void setHeaderMail(String headerMail) {
+        this.headerMail = headerMail;
+    }
+    public String getHeaderMail( ) {
+        return headerMail;
+    }
+
+    public void setHeaderFullname(String headerFullname) {
+        this.headerFullname = headerFullname;
+    }
+    public String getHeaderFullname( ) {
+        return headerFullname;
+    }
+    
+    public void setReplacementChar(String replacementChar) {
+        this.replacementChar = replacementChar;
+    }
+    public String getReplacementChar( ) {
+        return replacementChar;
+    }
+
 }
