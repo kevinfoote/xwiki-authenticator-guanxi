@@ -62,4 +62,9 @@ public class GuanxiShibConstants {
      */
     public final static String HEADER_FULLNAME = "header.fullname";
 
+    /**
+     *  Default replacemnt char when encountering userid mappings 
+     */
+    public final static String REPLACEMENT_CHAR = "replacement.char";
+
 }

@@ -70,24 +70,11 @@ public class GuanxiShibConfig {
     private String headerFullname;
 
     /**
-     * header to use for fullname 
-     */
-    private String headerFullname;
-
-    /**
      * replacement char to use when defining eppn users 
      */
     private String replacementChar;
 
     /** METHODS TO FOLLOW **/
-   public boolean isCreateUsers() {
-        return createUsers;
-    }
-
-    public void setCreateUsers(boolean createUsers) {
-        this.createUsers = createUsers;
-
-
     public void setPropertiesFile(String propertiesFile) {
         this.propertiesFile = propertiesFile;
     }

@@ -47,13 +47,14 @@ public class GuanxiShibConfigurator {
     public GuanxiShibConfig getGuanxiShibConfig( ) {
        
        if (log.isDebugEnabled()) {
-           log.debug("Loading GuanxiShibConfig using " + GuanxiShibConstants.PROPERTIES_FILE);
+           log.debug("Loading GuanxiShibConfig using " + 
+              GuanxiShibConstants.PROPERTIES_FILE + " for GX-Auth values");
        }
 
        GuanxiShibConfig config = new GuanxiShibConfig();
 
        try { 
-           //LOAD the config from file
+           // load the config from file
            InputStream propertiesIn = null; 
            propertiesIn = GuanxiShibAuthenticator.class.getResourceAsStream(
                     GuanxiShibConstants.PROPERTIES_FILE);
@@ -61,7 +62,104 @@ public class GuanxiShibConfigurator {
            Properties configProperties = new Properties();
            configProperties.load(propertiesIn);
 
-           if( ) {
+           // set properties file
+           config.setPropertiesFile(configProperties.getProperty(
+                GuanxiShibConstants.PROPERTIES_FILE));
+
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator Properties file set to: " + 
+                  config.getPropertiesFile());
+           }
+
+           // set create users
+           config.setCreateUsers(Boolean.valueOf(configProperties.getProperty(
+                GuanxiShibConstants.CREATE_USERS)).booleanValue());
+
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator set to create users: " + 
+                  config.isCreateUsers());
+           }
+
+           // set update info 
+           config.setUpdateInfo(Boolean.valueOf(configProperties.getProperty(
+                GuanxiShibConstants.UPDATE_INFO)).booleanValue());
+
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator set to update info: " + 
+                  config.isCreateUsers());
+           }
+
+           // set default groups 
+           List defaultGroups = new ArrayList();
+
+           String groups = configProperties.getProperty(
+               GuanxiShibConstants.DEFAULT_XWIKI_GROUPS);
+           
+           if (groups != null) {
+                defaultGroups.addAll(StringUtils.
+                    toListDelimitedByComma(groups));
+                
+                if (log.isDebugEnabled()) {
+                    for (Iterator i = defaultGroups.iterator(); i.hasNext();) {
+                        log.debug("Adding group " + i.next().toString() +
+                                  " to list of groups");
+                    }
+                }
+           }
+
+           config.setDefaultGroups(defaultGroups);
+             
+           // set default user space 
+           config.setDefaultUserSpace(configProperties.getProperty(
+                GuanxiShibConstants.DEFAULT_XWIKI_USER_SPACE));
+
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator using " + 
+                  config.getDefaultUserSpace() + " as user space");
+           }
+
+           // set userid header 
+           config.setHeaderUserid(configProperties.getProperty(
+                GuanxiShibConstants.HEADER_USERID));
+         
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator userid header set to " + 
+                  config.getHeaderUserid());
+           }
+
+           // set header mail
+           config.setHeaderMail(configProperties.getProperty(
+                GuanxiShibConstants.HEADER_MAIL));
+         
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator mail header set to " + 
+                  config.getHeaderMail());
+           }
+
+           // set header fullname
+           config.setHeaderFullname(configProperties.getProperty(
+                GuanxiShibConstants.HEADER_FULLNAME));
+         
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator fullname header set to " + 
+                  config.getHeaderFullname());
+           }
+
+           // set 
+           config.setReplacementChar(configProperties.getProperty(
+                GuanxiShibConstants.REPLACEMENT_CHAR));
+         
+           if (log.isDebugEnabled()) {
+               log.debug(
+                  "GuanxiAuthenticator replacement character set to " + 
+                  config.getReplacementChar());
            }
            
        } catch (IOException e) {
