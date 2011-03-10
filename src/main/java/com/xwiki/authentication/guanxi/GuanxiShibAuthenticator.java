@@ -36,6 +36,7 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.classes.BaseClass;
 import com.xpn.xwiki.user.api.XWikiUser;
 import com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl;
+import com.xpn.xwiki.web.XWikiRequest;
 
 public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
 
@@ -44,8 +45,15 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
      */
     private static final Log log = LogFactory.getLog(GuanxiShibAuthenticator.class);
 
-    // will need to get our CONSTANTS set up 
-    // function to read guanxiShibAuthenticator.properties
+    /** 
+     * Establish our config vars
+     */
+    private static GuanxiShibConfig gxConfig;
+
+    static {
+        gxConfig = GuanxiShibConfigurator.getGuanxiShibConfig( );
+    }
+
 
     /**
      *   
@@ -53,9 +61,11 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
      */
     @Override
     public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException {
-        Principal principal = null;
-        // Will call checkAuth function from here.. 
-        return principal;
+        // establish the only valid login is through SSO now. 
+        // does not take into account login/password.
+        // could perhaps model something after sakai's xlogin later 
+        XWikiUser user = checkAuth(context);
+        return user == null ? null : new SimplePrincipal(checkAuth(context).getUser());
     }
 
     /**
@@ -68,6 +78,23 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
         // this is where real work is to be done .. 
         // pull header / REMOTE_USER info should call createUser 
         //   if create_user is true and user does not exist
+        XWikiRequest req = context.getRequest();
+        String userid = createSafeUserid(req.getRemoteUser());
+
+        if (userExists(userid,context)) {
+            user = getUser
+        }
+
+        try {
+            //Principal principal = this.getUserPrincipal(userid,context);
+            //createUserFromAttributes(userid,req);
+             
+        } catch (XWikiException e) // looking for user exists
+            Principal principal = this.createUserFromAttributes(context); 
+        }
+
+        principal
+
         return user;
     }
 
@@ -79,7 +106,75 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     public void showLogin(XWikiContext context) throws XWikiException {
     }
 
-    public void sayHello() {
+    /**
+     *   
+     *
+     */
+    //private void createUser() { return; }
+    private Principal createUserFromAttributes(XWikiContext context) throws XWikiException {
+
+        try {
+            BaseClass baseclass = context.getWiki().getUserClass(context);
+            String[] parts = context.getRequest().getHttpServletRequest().getHeader(
+                "HTTP_cn").split(";");
+
+            String userIDAttribute = parts[0];
+            String fullwikiname = "XWiki." + userIDAttribute;
+
+            XWikiDocument doc = context.getWiki().getDocument(fullwikiname, context);
+            //if (!doc.isNew()) {
+            //return getUserPrincipal(fullwikiname, context);
+            //}
+
+            Map map = new HashMap();
+            map.put("active", "1");
+            BaseObject newobject = (BaseObject)baseclass.fromMap(map, context);
+            newobject.setName(fullwikiname);
+            doc.addObject(baseclass.getName(), newobject);
+            doc.setParent("");
+            doc.setContent("#includeForm(\"XWiki.XWikiUserTemplate\")");
+
+            context.getWiki().ProtectUserPage(context, fullwikiname, "edit", doc);
+
+            context.getWiki().saveDocument(doc, null, context);
+
+            context.getWiki().SetUserDefaultGroup(context, fullwikiname);
+
+            return getUserPrincipal(fullwikiname, context);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Update user info based on incoming header values.
+     *
+     * @param context XWiki context
+     * @throws XWikiException error 
+     */
+    public void updateUserInfo() {
         return;
     }
+
+    /**
+     *  Get a safe string to use as a userid within XWiki
+     *
+     *  @param String string to check
+     *  @param String returns a valid string
+     */
+    private String createSafeUserid(String userid) {
+        String u = StringUtils.makeValid(userid,
+           gxConfig.getReplacementChar());
+        return u;
+    }
+
+    /**
+     * 
+     * 
+     */
+    private boolean userExists() {
+        
+        return;
+    }
+    
 }
