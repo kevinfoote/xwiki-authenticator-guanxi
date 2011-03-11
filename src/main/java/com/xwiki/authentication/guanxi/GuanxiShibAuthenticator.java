@@ -48,10 +48,10 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     /** 
      * Establish our config vars
      */
-    private static GuanxiShibConfig gxConfig;
+    private static GuanxiShibConfig gxconfig;
 
     static {
-        gxConfig = GuanxiShibConfigurator.getGuanxiShibConfig( );
+        gxconfig = GuanxiShibConfigurator.getGuanxiShibConfig( );
     }
 
 
@@ -74,52 +74,76 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
      */
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException {
-        XWikiUser user = null;
         // this is where real work is to be done .. 
-        // pull header / REMOTE_USER info should call createUser 
+        // pull header / REMOTE_USER info should call createUserFromAttributes
         //   if create_user is true and user does not exist
+        
+        XWikiUser xuser = null;
         XWikiRequest req = context.getRequest();
-        String userid = createSafeUserid(req.getRemoteUser());
+        String eid = createSafeUserid(req.getRemoteUser());
 
-        if (userExists(userid,context)) {
-            user = getUser
+        if (eid == null) {
+            eid = createSafeUserid(context.getRequest().getHttpServletRequest().getHeader(
+             gxconfig.getHeaderUserid()));
+            if (log.isDebugEnabled()) {
+              log.debug("getting EID value from header value");
+            }
         }
+
+        log.info("working with EID of " + eid);
 
         try {
-            //Principal principal = this.getUserPrincipal(userid,context);
-            //createUserFromAttributes(userid,req);
-             
-        } catch (XWikiException e) // looking for user exists
-            Principal principal = this.createUserFromAttributes(context); 
-        }
+            if (userExists(eid,context)) {
+                String fullwikiname = gxconfig.getDefaultUserSpace() + "." + eid;
+                xuser.setUser(fullwikiname);
+                if (log.isDebugEnabled()) {
+                   log.debug("user exists in xwiki continuing on");
+                }
+            }
+        } catch (Exception e) {
+            Principal principal = createUserFromAttributes(context); 
+            String fullwikiname = principal.getName(); 
+            if (log.isDebugEnabled()) {
+              log.debug("after create finished your full name is " + fullwikiname);
+            }
 
-        principal
+            xuser.setUser(fullwikiname);
+        } 
 
-        return user;
+        String username = xuser.getUser();
+        context.setUser(username);
+        return xuser;
     }
 
     /**
      *   
      *
      */
-    @Override
-    public void showLogin(XWikiContext context) throws XWikiException {
-    }
-
-    /**
-     *   
-     *
-     */
-    //private void createUser() { return; }
     private Principal createUserFromAttributes(XWikiContext context) throws XWikiException {
 
         try {
+            if (log.isDebugEnabled()) {
+              log.debug("attempting to create a user for you");
+            }
             BaseClass baseclass = context.getWiki().getUserClass(context);
-            String[] parts = context.getRequest().getHttpServletRequest().getHeader(
-                "HTTP_cn").split(";");
+            XWikiRequest req = context.getRequest();
 
-            String userIDAttribute = parts[0];
-            String fullwikiname = "XWiki." + userIDAttribute;
+            String eid = createSafeUserid(req.getRemoteUser());
+            if (eid == null) {
+                eid = createSafeUserid(context.getRequest().getHttpServletRequest().
+                  getHeader(gxconfig.getHeaderUserid()));
+                if (log.isDebugEnabled()) {
+                    log.debug("getting EID value from header value");
+                }
+            }
+       
+            String email = context.getRequest().getHttpServletRequest().getHeader(
+               gxconfig.getHeaderMail());
+
+            String displayname = context.getRequest().getHttpServletRequest().
+               getHeader(gxconfig.getHeaderFullname());
+
+            String fullwikiname = gxconfig.getDefaultUserSpace() + "." + eid;
 
             XWikiDocument doc = context.getWiki().getDocument(fullwikiname, context);
             //if (!doc.isNew()) {
@@ -152,7 +176,7 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
      * @param context XWiki context
      * @throws XWikiException error 
      */
-    public void updateUserInfo() {
+    public void updateUserInfo() throws XWikiException {
         return;
     }
 
@@ -163,18 +187,74 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
      *  @param String returns a valid string
      */
     private String createSafeUserid(String userid) {
+        userid.toLowerCase();
         String u = StringUtils.makeValid(userid,
-           gxConfig.getReplacementChar());
+           gxconfig.getReplacementChar());
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating xwiki-safe userid " + userid +
+              " = " + u);
+        }
+
         return u;
+    }
+
+    /**
+     * See if user exists in the system already.
+     * 
+     * @param String eid Enterprise id of user
+     * @param XWikiContext context The context
+     * @return Boolean t,f
+     */
+    private Boolean userExists(String eid, XWikiContext context) {
+        Boolean b = new Boolean(true);
+        String fullwikiname = gxconfig.getDefaultUserSpace() + "." + eid;
+        Principal p = getUserPrincipal(fullwikiname,context);
+
+        if (p == null) {
+            b = false;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("looking for user " + fullwikiname + "[" + eid + 
+              "] = " + b); 
+        }
+        
+
+        return b;
     }
 
     /**
      * 
      * 
      */
-    private boolean userExists() {
-        
-        return;
-    }
-    
+    private Principal getUserPrincipal(String susername, XWikiContext context) {
+        Principal principal = null;
+
+        // First we check in the local database
+        try {
+            String user = findUser(susername, context);
+            if (user!=null) {
+                principal = new SimplePrincipal(user);
+            }
+        } catch (Exception e) {}
+
+        if (context.isVirtual()) {
+         if (principal==null) {
+         // Then we check in the main database
+            String db = context.getDatabase();
+            try {
+                context.setDatabase(context.getWiki().getDatabase());
+                try {
+                    String user = findUser(susername, context);
+                    if (user!=null)
+                        principal = new SimplePrincipal(context.getDatabase() + ":" + user);
+                } catch (Exception e) {}
+            } finally {
+                context.setDatabase(db);
+            }
+         }
+        }
+        return principal;
+     }
 }
