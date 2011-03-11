@@ -54,65 +54,58 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
         gxconfig = GuanxiShibConfigurator.getGuanxiShibConfig( );
     }
 
-
     /**
-     *   
-     *
-     */
-    @Override
-    public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException {
-        // establish the only valid login is through SSO now. 
-        // does not take into account login/password.
-        // could perhaps model something after sakai's xlogin later 
-        XWikiUser user = checkAuth(context);
-        return user == null ? null : new SimplePrincipal(checkAuth(context).getUser());
-    }
-
-    /**
-     *   
-     *
+     * Authenticates the user
+     * @param context
+     * @return authenticated XWiki user
+     * @throws com.xpn.xwiki.XWikiException
      */
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException {
-        // this is where real work is to be done .. 
-        // pull header / REMOTE_USER info should call createUserFromAttributes
-        //   if create_user is true and user does not exist
-        
-        XWikiUser xuser = null;
-        XWikiRequest req = context.getRequest();
-        String eid = createSafeUserid(req.getRemoteUser());
 
-        if (eid == null) {
-            eid = createSafeUserid(context.getRequest().getHttpServletRequest().getHeader(
-             gxconfig.getHeaderUserid()));
-            if (log.isDebugEnabled()) {
-              log.debug("getting EID value from header value");
-            }
+        log.debug("GuanxiShibAuthenticator.checkAuth");
+
+        String user = context.getRequest().getRemoteUser();
+
+        if ((user == null) || user.equals("")) {
+            log.debug("GuanxiShibAuthenticator: (REMOTE_USER) is null/not present");
+            log.debug("GuanxiShibAuthenticator: using header search instead");
+
+            user = context.getRequest().getHttpServletRequest().
+                  getHeader(gxconfig.getHeaderUserid());
+            user = user.toLowerCase();
+            this.createUser(user, context);
+            user = gxconfig.getDefaultUserSpace() + "." + user;
+
+        } else {
+            user = user.toLowerCase();
+            this.createUser(user, context);
+            user = gxconfig.getDefaultUserSpace() + "." + user;
         }
+                                                                                                         context.setUser(user);
+        log.debug("GuanxiShibAuthenticator: authentication successful for user " + user);
+        return new XWikiUser(user);
+    }
 
-        log.info("working with EID of " + eid);
-
-        try {
-            if (userExists(eid,context)) {
-                String fullwikiname = gxconfig.getDefaultUserSpace() + "." + eid;
-                xuser.setUser(fullwikiname);
-                if (log.isDebugEnabled()) {
-                   log.debug("user exists in xwiki continuing on");
-                }
-            }
-        } catch (Exception e) {
-            Principal principal = createUserFromAttributes(context); 
-            String fullwikiname = principal.getName(); 
-            if (log.isDebugEnabled()) {
-              log.debug("after create finished your full name is " + fullwikiname);
-            }
-
-            xuser.setUser(fullwikiname);
-        } 
-
-        String username = xuser.getUser();
-        context.setUser(username);
-        return xuser;
+    /**
+     * Creates the user if he doesnt exist in the XWiki repository. 
+     * User is assigned to the default XWikiAllGroup
+     *
+     * @param String  
+     * @param context
+     * @throws com.xpn.xwiki.XWikiException
+     */
+    @Override
+    protected void createUser(String user, XWikiContext context) throws XWikiException {
+        String xwikiUser = super.findUser(user, context);
+        if (xwikiUser == null) {
+            log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " does not exist");
+            String wikiname = context.getWiki().clearName(user, true, true, context);
+            context.getWiki().createEmptyUser(wikiname, "edit", context);
+            log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " has been created");
+        } else {
+            log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " exists continuing");
+        }
     }
 
     /**
