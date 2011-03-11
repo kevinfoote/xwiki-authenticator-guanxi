@@ -44,7 +44,7 @@ public class GuanxiShibConfigurator {
      *   
      *   Load the config from file 
      */
-    public GuanxiShibConfig getGuanxiShibConfig( ) {
+    public static GuanxiShibConfig getGuanxiShibConfig( ) {
        
        if (log.isDebugEnabled()) {
            log.debug("Loading GuanxiShibConfig using " + 
