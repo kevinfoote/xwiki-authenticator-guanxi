@@ -124,10 +124,11 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     protected void createUser(String user, XWikiContext context) throws XWikiException {
         String xwikiUser = super.findUser(user, context);
         if (xwikiUser == null) {
-            log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " does not exist");
+            String xwikifullname = getXwikiFullName(user);
+            log.debug("GuanxiShibAuthenticator: User " + xwikifullname + " does not exist");
             String wikiname = context.getWiki().clearName(user, true, true, context);
             context.getWiki().createEmptyUser(wikiname, "edit", context);
-            log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " has been created");
+            log.debug("GuanxiShibAuthenticator: User " + xwikifullname + " has been created");
         } else {
             log.debug("GuanxiShibAuthenticator: User " + xwikiUser + " exists continuing");
         }
