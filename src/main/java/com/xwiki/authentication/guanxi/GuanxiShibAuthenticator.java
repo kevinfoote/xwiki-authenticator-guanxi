@@ -96,14 +96,18 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
                 log.debug("GuanxiShibAuthenticator: noting found in " + 
                     gxconfig.getHeaderUserid() + " not logged in");
             } else { 
-                String safeEID = getSafeUserid(eid);
-            	this.createUser(safeEID, context);
-	        xwikifullname = getXwikiFullName(safeEID);
+                if (gxconfig.isCreateUsers()) {
+                    String safeEID = getSafeUserid(eid);
+            	    this.createUser(safeEID, context);
+	            xwikifullname = getXwikiFullName(safeEID);
+                }
             } 
         } else {
-            String safeEID = getSafeUserid(eid);
-            this.createUser(safeEID, context);
-	    xwikifullname = getXwikiFullName(safeEID);
+            if (gxconfig.isCreateUsers()) {
+                String safeEID = getSafeUserid(eid);
+                this.createUser(safeEID, context);
+	        xwikifullname = getXwikiFullName(safeEID);
+            }
         }
 
         context.setUser(xwikifullname);
