@@ -57,9 +57,12 @@ public class StringUtils {
         return results;
     }
     
+    /**
+     *   
+     */
     public static String makeValid(String s, String r) {
         s.replace(".",r);
-        s.replace("@",r);
+        //s.replace("@",r);
         return s;
     }
 }
