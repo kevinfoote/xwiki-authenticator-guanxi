@@ -1,6 +1,6 @@
 xwiki-authenticator-guanxi
 ===================
-Kevin Foote <kpfoote@iup.edu>
+Kevin Foote <kpfoote@iup.edu> 
 
 
 Introduction
@@ -24,3 +24,9 @@ For more information on protecting resources with Shibboleth see http://shibbole
 
 License
 ----------
+
+
+Credits
+----------
+Alistair Young <http://codebrane.com> original xwiki shib work
+
