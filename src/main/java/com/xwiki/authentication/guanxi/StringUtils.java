@@ -40,6 +40,9 @@ public class StringUtils {
 
     /**
      *  Turn a long string into a list split by our delimeter
+     *
+     *  @param String comma separated list
+     *  @return List a list of strings
      */
     public static List toListDelimitedByComma(String s) {
         if(s == null) return Collections.EMPTY_LIST;
@@ -58,7 +61,11 @@ public class StringUtils {
     }
     
     /**
-     *   
+     * Clean the incomming string to XWiki name standards
+     *
+     * @param String to clean
+     * @param String to use as replacement
+     * @return String valid string
      */
     public static String makeValid(String s, String r) {
         s.replace(".",r);
