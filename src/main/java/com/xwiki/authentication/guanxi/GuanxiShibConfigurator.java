@@ -89,7 +89,7 @@ public class GuanxiShibConfigurator {
            if (log.isDebugEnabled()) {
                log.debug(
                   "GuanxiAuthenticator set to update info: " + 
-                  config.isCreateUsers());
+                  config.isUpdateInfo());
            }
 
            // set default groups 
