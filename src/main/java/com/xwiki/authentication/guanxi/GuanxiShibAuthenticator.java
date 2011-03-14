@@ -96,18 +96,14 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
                 log.debug("GuanxiShibAuthenticator: noting found in " + 
                     gxconfig.getHeaderUserid() + " not logged in");
             } else { 
-                if (gxconfig.isCreateUsers()) {
-                    String safeEID = getSafeUserid(eid);
-            	    this.createUser(safeEID, context);
-	            xwikifullname = getXwikiFullName(safeEID);
-                }
+                String safeEID = getSafeUserid(eid);
+            	this.createUser(safeEID, context);
+	        xwikifullname = getXwikiFullName(safeEID);
             } 
         } else {
-            if (gxconfig.isCreateUsers()) {
-                String safeEID = getSafeUserid(eid);
-                this.createUser(safeEID, context);
-	        xwikifullname = getXwikiFullName(safeEID);
-            }
+            String safeEID = getSafeUserid(eid);
+            this.createUser(safeEID, context);
+	    xwikifullname = getXwikiFullName(safeEID);
         }
 
         context.setUser(xwikifullname);
@@ -127,7 +123,7 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     @Override
     protected void createUser(String user, XWikiContext context) throws XWikiException {
         String xwikiUser = super.findUser(user, context);
-        if (xwikiUser == null) {
+        if ((xwikiUser == null) && (gxconfig.isCreateUsers())) {
             String xwikifullname = getXwikiFullName(user);
             log.debug("GuanxiShibAuthenticator: User " + xwikifullname + " does not exist");
             String wikiname = context.getWiki().clearName(user, true, true, context);
