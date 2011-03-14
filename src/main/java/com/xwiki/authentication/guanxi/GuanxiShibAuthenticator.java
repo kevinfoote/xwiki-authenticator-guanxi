@@ -55,9 +55,23 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     }
 
     /**
+     * Authenticate user. 
+     *
+     * @param String,String,XWikiContext
+     * @return Principal
+     */ 
+    @Override
+    public Principal authenticate(String username, String password, XWikiContext context) throws XWikiException {
+        log.debug("GuanxiShibAuthenticator.authenticate");
+        //only work with SSO, does not take into account login/password
+        XWikiUser user = checkAuth(context);
+        return user == null ? null : new SimplePrincipal(checkAuth(context).getUser());
+    }
+
+    /**
      * Authenticates the user
      * @param context
-     * @return authenticated XWiki user
+     * @return authenticated XWiki user object
      * @throws com.xpn.xwiki.XWikiException
      */
     @Override
@@ -65,26 +79,37 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
 
         log.debug("GuanxiShibAuthenticator.checkAuth");
 
-        String user = context.getRequest().getRemoteUser();
+        // Set default to Guest
+        String xwikifullname = "XWiki.XWikiGuest";
+        log.debug("GuanxiShibAuthenticator: set guest user");
 
-        if ((user == null) || user.equals("")) {
+        String eid = context.getRequest().getRemoteUser();
+
+        if ((eid == null) || eid.equals("")) {
             log.debug("GuanxiShibAuthenticator: (REMOTE_USER) is null/not present");
             log.debug("GuanxiShibAuthenticator: using header search instead");
-
-            user = context.getRequest().getHttpServletRequest().
+            
+            eid = context.getRequest().getHttpServletRequest().
                   getHeader(gxconfig.getHeaderUserid());
-            user = user.toLowerCase();
-            this.createUser(user, context);
-            user = gxconfig.getDefaultUserSpace() + "." + user;
 
+            if ((eid == null) || eid.equals("")) { 
+                log.debug("GuanxiShibAuthenticator: noting found in " + 
+                    gxconfig.getHeaderUserid() + " not logged in");
+            } else { 
+                String safeEID = getSafeUserid(eid);
+            	this.createUser(safeEID, context);
+	        xwikifullname = getXwikiFullName(safeEID);
+            } 
         } else {
-            user = user.toLowerCase();
-            this.createUser(user, context);
-            user = gxconfig.getDefaultUserSpace() + "." + user;
+            String safeEID = getSafeUserid(eid);
+            this.createUser(safeEID, context);
+	    xwikifullname = getXwikiFullName(safeEID);
         }
-                                                                                                         context.setUser(user);
-        log.debug("GuanxiShibAuthenticator: authentication successful for user " + user);
-        return new XWikiUser(user);
+
+        context.setUser(xwikifullname);
+        log.info("GuanxiShibAuthenticator: authentication successful for user " 
+           + xwikifullname);
+        return new XWikiUser(xwikifullname);
     }
 
     /**
@@ -109,7 +134,7 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     }
 
     /**
-     *   
+     *   Creates the user (Prinicpal) from header attributes delivered by shibboleth
      *
      */
     private Principal createUserFromAttributes(XWikiContext context) throws XWikiException {
@@ -121,9 +146,9 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
             BaseClass baseclass = context.getWiki().getUserClass(context);
             XWikiRequest req = context.getRequest();
 
-            String eid = createSafeUserid(req.getRemoteUser());
+            String eid = getSafeUserid(req.getRemoteUser());
             if (eid == null) {
-                eid = createSafeUserid(context.getRequest().getHttpServletRequest().
+                eid = getSafeUserid(context.getRequest().getHttpServletRequest().
                   getHeader(gxconfig.getHeaderUserid()));
                 if (log.isDebugEnabled()) {
                     log.debug("getting EID value from header value");
@@ -174,21 +199,20 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
     }
 
     /**
-     *  Get a safe string to use as a userid within XWiki
+     *  Get a safe string to use as the suffix portion of xwikifullname 
      *
      *  @param String string to check
      *  @param String returns a valid string
      */
-    private String createSafeUserid(String userid) {
+    private String getSafeUserid(String userid) {
         userid.toLowerCase();
         String u = StringUtils.makeValid(userid,
            gxconfig.getReplacementChar());
 
         if (log.isDebugEnabled()) {
-            log.debug("Creating xwiki-safe userid " + userid +
-              " = " + u);
+            log.debug("GuanxiAuthenticator: created XWiki safe userid " + u + 
+              " from " + userid);
         }
-
         return u;
     }
 
@@ -212,8 +236,6 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
             log.debug("looking for user " + fullwikiname + "[" + eid + 
               "] = " + b); 
         }
-        
-
         return b;
     }
 
@@ -249,5 +271,15 @@ public class GuanxiShibAuthenticator extends XWikiAuthServiceImpl {
          }
         }
         return principal;
+     }
+
+    /**
+     * Get the full String representation of the Xwiki username in the form of SPACE.USER
+     * 
+     * @param String incomming enterprize id of user
+     * @return String XWiki username 
+     */
+     private String getXwikiFullName(String user) {
+         return (String) gxconfig.getDefaultUserSpace() + "." + user;
      }
 }
